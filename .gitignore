@@ -15,3 +15,5 @@ build/
 .~*.vue
 doc/.ipynb_checkpoints/
 htmlcov/
+MANIFEST
+dist/
