@@ -23,15 +23,11 @@ if not os.path.exists("models/en-default.pyrnn.gz"):
 models = [c for c in glob.glob("models/*pyrnn.gz")]
 scripts = [c for c in glob.glob("ocropus-*") if "." not in c and "~" not in c]
 
-with codecs.open('README.md', encoding='utf-8') as f:
-    README = f.read()
-
 setup(
     name = 'ocrd-fork-ocropy',
-    version = 'v1.3.3',
+    version = 'v1.3.4-pre1',
     author = "Thomas Breuel",
     description = "The OCRopy RNN-based Text Line Recognizer",
-    long_description = README,
     packages = ["ocrolib"],
     data_files= [('share/ocropus', models)],
     scripts = scripts,
