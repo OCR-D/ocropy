@@ -5,8 +5,8 @@ models = [c for c in glob('models/*pyrnn.gz')]
 scripts = [c for c in glob('ocropus-*') if '.' not in c and '~' not in c]
 
 setup(
-    name='ocropy',
-    version='2.0.0a1',
+    name='ocrd-fork-ocropy',
+    version='1.4.0a1',
     author='Thomas Breuel',
     maintainer='Konstantin Baierer',
     maintainer_email='unixprog@gmail.com',
