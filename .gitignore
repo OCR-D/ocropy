@@ -15,5 +15,6 @@ build/
 .~*.vue
 doc/.ipynb_checkpoints/
 htmlcov/
-MANIFEST
-dist/
+dist
+*.egg-info
+linegen/

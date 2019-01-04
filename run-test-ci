@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # Usage: ./run-test-ci [tests...]
 #
@@ -15,7 +15,10 @@ BASE=$(dirname $0)
 #       PATH=$PWD:$PATH RUNNER='python2 -m coverage run --include=$PWD/**/*' ./run-test
 #       PATH=$PWD:$PATH RUNNER='python3' ./run-test
 # See ./run-coverage for a real example.
-RUNNER="${RUNNER:-python2}"
+RUNNER="${RUNNER:-python}"
+
+# Number of iterations to train
+TRAIN_ITERATIONS="${TRAIN_ITERATIONS:-5}"
 
 test_page() {
     set -x
@@ -65,13 +68,13 @@ test_linegen() {
 
 test_rtrain() {
     tar -zxf $BASE/tests/uw3-500.tgz
-    $RUNNER $BASE/ocropus-rtrain 'book/*/*.bin.png' -N 5 -o ci-test-model
+    $RUNNER $BASE/ocropus-rtrain 'book/*/*.bin.png' -N $TRAIN_ITERATIONS -o ci-test-model
 }
 
 test_rtrain_files() {
     tar -zxf $BASE/tests/uw3-500.tgz
     find 'book' -name '*.bin.png' > INPUT_FILES
-    $RUNNER $BASE/ocropus-rtrain -f INPUT_FILES -N 5 -o ci-test-model
+    $RUNNER $BASE/ocropus-rtrain -f INPUT_FILES -N $TRAIN_ITERATIONS -o ci-test-model
     rm INPUT_FILES
 }
 
@@ -86,13 +89,13 @@ test_nlbin() {
 test_gpageseg() {
     local TESTIMAGE=text-near-edge.bin.png
     cp $BASE/tests/$TESTIMAGE temp
-    $RUNNER $BASE/ocropus-gpageseg temp/$TESTIMAGE
-    $RUNNER $BASE/ocropus-gpageseg temp/$TESTIMAGE -n
-    $RUNNER $BASE/ocropus-gpageseg temp/$TESTIMAGE -n --maxseps 3
-    $RUNNER $BASE/ocropus-gpageseg temp/$TESTIMAGE -n -b
-    $RUNNER $BASE/ocropus-gpageseg temp/$TESTIMAGE -n --usegauss
+    $RUNNER $BASE/ocropus-gpageseg --debug temp/$TESTIMAGE
+    $RUNNER $BASE/ocropus-gpageseg --debug temp/$TESTIMAGE -n
+    $RUNNER $BASE/ocropus-gpageseg --debug temp/$TESTIMAGE -n --maxseps 3
+    $RUNNER $BASE/ocropus-gpageseg --debug temp/$TESTIMAGE -n -b
+    $RUNNER $BASE/ocropus-gpageseg --debug temp/$TESTIMAGE -n --usegauss
     cp $BASE/tests/table.bin.png $BASE/tests/table.mask.png temp
-    $RUNNER $BASE/ocropus-gpageseg temp/table.bin.png --debug -n --minscale 7 --maxcolseps 0
+    $RUNNER $BASE/ocropus-gpageseg --debug temp/table.bin.png --debug -n --minscale 7 --maxcolseps 0
 }
 
 test_rpred() {
@@ -114,6 +117,19 @@ test_gtedit() {
     $RUNNER $BASE/ocropus-gtedit write temp/gtedit-together.gt.txt temp/out -x .copy.gt.txt
 }
 
+# Make sure there are no syntax errors
+test_smoke() {
+    for i in $BASE/ocropus-*;do
+        if [[ "$i" = *ocropus-lpred ]];then
+            continue
+        fi
+        if [[ "$i" = *ocropus-ltrain ]];then
+            continue
+        fi
+        $i --help > /dev/null
+    done
+}
+
 rm -rf temp
 mkdir -p temp
 if (( $# > 0 ));then
@@ -121,6 +137,7 @@ if (( $# > 0 ));then
         test_$test
     done
 else
+    test_smoke
     test_page
     test_conf
     test_linegen
