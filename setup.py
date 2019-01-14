@@ -6,7 +6,7 @@ scripts = [c for c in glob('ocropus-*') if '.' not in c and '~' not in c]
 
 setup(
     name='ocrd-fork-ocropy',
-    version='1.4.0a1',
+    version='1.4.0a2',
     author='Thomas Breuel',
     maintainer='Konstantin Baierer',
     maintainer_email='unixprog@gmail.com',
